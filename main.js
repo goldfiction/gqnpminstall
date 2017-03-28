@@ -62,33 +62,30 @@ exports.npmInstall=q_npmInstall;
 
 // this try to require module normally, when fails, invoke installModule
 function newRequire(module, cb) {
+    cb=cb||function(e,r){
+        console.log(e.stack);
+    };
+
     if(!module){
         return cb("No module given!");
     }
+
     var result = null;
+
     try {
         result = require(module);
-        try{
-            console.log("normal required: "+module)
-            cb(null, result);
-            return result;
-        }catch(e){}
+        console.log("normal required: "+module);
+        cb(null, result);
     } catch (e) {
         installModule(module, function (err, resp) {
-            setTimeout(function(){
-                try {
-                    result = require(module);
-                    try{
-                        console.log("success install required: "+module)
-                        cb(null, result);
-                    }catch(e){}
-                } catch (e) {
-                    try{
-                        console.log("failed to install require: "+module)
-                        cb(e, null);
-                    }catch(e){}
-                }
-            },100);
+            try {
+                result = require(module);
+                console.log("success install required: "+module);
+                cb(null, result);
+            } catch (e) {
+                console.log("failed to install require: "+module);
+                cb(e, null);
+            }
         })
     }
 }

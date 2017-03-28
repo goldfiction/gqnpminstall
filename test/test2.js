@@ -12,4 +12,6 @@ it("should be able to require modules like normal",function(done){
     // async. That means if you run with forever, however, the modules
     // will be installed correctly after a few failed start ups. This
     // behaviour is observed and deem as expected.
+
+    done();
 })
