@@ -5,11 +5,11 @@ var requ=require('./../main.js');
 var assert=require('assert');
 
 it("clear up past module",function(done){
-    requ.uninstallModule({module:"underscore"}).then(function(o){done(o.error)});
+    requ.uninstallModule({module:"underscore@1.8.0"}).then(function(o){done(o.error)});
 });
 
 it("should be able to install require",function(done){
-    requ.q_require({module:"underscore"}).then(function(o){
+    requ.q_require({module:"underscore@1.8.0"}).then(function(o){
         var _= o.result;
         var resu = _.first([1, 2, 3]);
         assert(resu === 1);
@@ -27,7 +27,7 @@ it("should be able to fail install wrong module",function(done){
 });
 
 it("should be able to success rerequire same module",function(done){
-    requ.q_require({module:"underscore"}).then(function(o){
+    requ.q_require({module:"underscore@1.8.0"}).then(function(o){
         var _= o.result;
         var resu = _.first([1, 2, 3]);
         assert(resu === 1);
@@ -36,7 +36,7 @@ it("should be able to success rerequire same module",function(done){
 });
 
 it("should be able to success require same module using require",function(done){
-    var _=requ.require("underscore");
+    var _=requ.require("underscore@1.8.0");
     var resu = _.first([1, 2, 3]);
     assert(resu === 1);
     done();

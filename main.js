@@ -9,6 +9,9 @@ const dosave=""; // change this to "--save" to have modules added to package.jso
 function installModule(o, cb) {
     console.log("trying to install module: "+ o.module);
     exec('npm install '+dosave +" "+ o.module, function callback(error, stdout, stderr) {
+        if(error){
+            console.log(error)
+        }
         cb(error,o);
     });
 }
@@ -23,6 +26,7 @@ exports.installModule=q_installModule;
 
 // this installs given local module
 function uninstallModule(o, cb) {
+    o.module= o.module.split('@')[0];
     console.log("trying to uninstall module: "+ o.module);
     exec('npm uninstall ' + o.module, function callback(error, stdout, stderr) {
         if (error) {
@@ -70,15 +74,17 @@ function newRequire(o, cb) {
         return cb(new Error("No module given!"));
     }
 
+    o.moduleName= o.module.split("@")[0];
+
     try {
-        o.result = require(o.module);
+        o.result = require(o.moduleName);
         console.log("normal required: "+ o.module);
         cb(null, o);
         return o.result;
     } catch (e) {
         installModule(o, function (err, resp) {
             try {
-                o.result = require(o.module);
+                o.result = require(o.moduleName);
                 console.log("success install required: "+ o.module);
                 cb(null, o);
                 return o.result;
