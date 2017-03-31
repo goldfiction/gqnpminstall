@@ -6,49 +6,48 @@ const doq=require('gqdoq');
 const dosave=""; // change this to "--save" to have modules added to package.json
 
 // this installs given local module
-function installModule(module, cb) {
-    console.log("trying to install module: "+module);
-    exec('npm install '+dosave +" "+ module, function callback(error, stdout, stderr) {
-        if (error) {
-            //console.log(error.stack);
-            cb(error);
-        }
-        else {
-            cb();
-        }
+function installModule(o, cb) {
+    console.log("trying to install module: "+ o.module);
+    exec('npm install '+dosave +" "+ o.module, function callback(error, stdout, stderr) {
+        cb(error,o);
     });
 }
 
-exports.installModule=installModule;
+function q_installModule(o){
+    o=o||{};
+    o.query=installModule;
+    return doq(o);
+}
+
+exports.installModule=q_installModule;
 
 // this installs given local module
-function uninstallModule(module, cb) {
-    console.log("trying to uninstall module: "+module);
-    exec('npm uninstall ' + module, function callback(error, stdout, stderr) {
+function uninstallModule(o, cb) {
+    console.log("trying to uninstall module: "+ o.module);
+    exec('npm uninstall ' + o.module, function callback(error, stdout, stderr) {
         if (error) {
             console.log(error.stack);
-            cb(error);
         }
-        else {
-            cb();
-        }
+        cb(error,o);
     });
 }
 
-exports.uninstallModule=uninstallModule;
+function q_uninstallModule(o){
+    o=o||{};
+    o.query=uninstallModule;
+    return doq(o);
+}
+
+exports.uninstallModule=q_uninstallModule;
 
 // this does a npm install
 function npmInstall(o,cb){
     o=o||{};
     exec('npm install', function callback(error, stdout, stderr) {
         if (error) {
-            o.error=error;
             console.log(error.stack);
-            cb(error,o);
         }
-        else {
-            cb(null,o);
-        }
+        cb(error,o);
     });
 }
 
@@ -61,49 +60,48 @@ function q_npmInstall(o){
 exports.npmInstall=q_npmInstall;
 
 // this try to require module normally, when fails, invoke installModule
-function newRequire(module, cb) {
+function newRequire(o, cb) {
     cb=cb||function(e,r){
-        console.log(e.stack);
+        if(e)
+            console.log(e.stack);
     };
 
-    if(!module){
-        return cb("No module given!");
+    if(!o.module){
+        return cb(new Error("No module given!"));
     }
 
-    var result = null;
-
     try {
-        result = require(module);
-        console.log("normal required: "+module);
-        cb(null, result);
+        o.result = require(o.module);
+        console.log("normal required: "+ o.module);
+        cb(null, o);
+        return o.result;
     } catch (e) {
-        installModule(module, function (err, resp) {
+        installModule(o, function (err, resp) {
             try {
-                result = require(module);
-                console.log("success install required: "+module);
-                cb(null, result);
+                o.result = require(o.module);
+                console.log("success install required: "+ o.module);
+                cb(null, o);
+                return o.result;
             } catch (e) {
-                console.log("failed to install require: "+module);
-                cb(e, null);
+                console.log("failed to install require: "+ o.module);
+                //console.log(e.stack);
+                cb(e, o);
+                return null;
             }
         })
     }
 }
 
-exports.require=newRequire;
-
-function q_o_newRequire(o,cb){
-    newRequire(o.module,function(e,r){
-        o.result=r;
-        cb(e,o);
-    });
+function doRequire(module){
+    return newRequire({module:module});
 }
 
+exports.require=doRequire;
+
 // this is a q_tree require
-function q_newRequire(module,o){
+function q_newRequire(o){
     o=o||{};
-    o.query=q_o_newRequire;
-    o.module=module;
+    o.query=newRequire;
     return doq(o);
 }
 
