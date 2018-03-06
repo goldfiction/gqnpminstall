@@ -1,9 +1,9 @@
 /**
  * Created by happy on 3/26/17.
  */
-const exec = require('child_process').exec;
-const doq=require('gqdoq');
-const dosave=""; // change this to "--save" to have modules added to package.json
+var exec = require('child_process').exec;
+var doq=require('gqdoq');
+var dosave=""; // change this to "--save" to have modules added to package.json
 
 // this installs given local module
 function installModule(o, cb) {
