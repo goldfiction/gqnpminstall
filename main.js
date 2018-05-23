@@ -112,12 +112,6 @@ function newRequire(o, cb) {
     }
 }
 
-function doRequire(module){
-    return newRequire({module:module});
-}
-
-exports.require=doRequire;
-
 // this is a q_tree require
 function q_newRequire(o){
     o=o||{};
@@ -126,3 +120,9 @@ function q_newRequire(o){
 }
 
 exports.q_require=q_newRequire;
+
+function doRequire(module){
+    return newRequire({module:module});
+}
+
+exports.require=doRequire;
