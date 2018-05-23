@@ -9,12 +9,16 @@ var debug=require("util").debug;
 // this installs given local module
 function installModule(o, cb) {
     debug("trying to install module: "+ o.module);
-    exec('npm install '+dosave +" "+ o.module, function callback(error, stdout, stderr) {
+    var child=exec('npm install '+dosave +" "+ o.module, function callback(error, stdout, stderr) {
         if(error){
             debug(error)
+            o.error=error
+            return cb(null,o);
         }
-        cb(error,o);
     });
+    child.on('exit', function() {
+        cb(null,o);
+    })
 }
 
 function q_installModule(o){
@@ -29,12 +33,16 @@ exports.installModule=q_installModule;
 function uninstallModule(o, cb) {
     o.module= o.module.split('@')[0];
     debug("trying to uninstall module: "+ o.module);
-    exec('npm uninstall ' + o.module, function callback(error, stdout, stderr) {
+    var child=exec('npm uninstall ' + o.module, function callback(error, stdout, stderr) {
         if (error) {
             debug(error.stack);
+            o.error=error
+            return cb(null,o);
         }
-        cb(error,o);
     });
+    child.on('exit', function() {
+        cb(null,o);
+    })
 }
 
 function q_uninstallModule(o){
@@ -48,12 +56,16 @@ exports.uninstallModule=q_uninstallModule;
 // this does a npm install
 function npmInstall(o,cb){
     o=o||{};
-    exec('npm install', function callback(error, stdout, stderr) {
+    var child=exec('npm install', function callback(error, stdout, stderr) {
         if (error) {
             debug(error.stack);
+            o.error=error
+            return cb(null,o);
         }
-        cb(error,o);
     });
+    child.on('exit', function() {
+        cb(null,o);
+    })
 }
 
 // this is q_tree npm install
@@ -92,6 +104,7 @@ function newRequire(o, cb) {
             } catch (e) {
                 debug("failed to install require: "+ o.module);
                 //console.log(e.stack);
+                o.error=e;
                 cb(e, o);
                 return null;
             }
